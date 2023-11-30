@@ -25,6 +25,13 @@ export const makePreauth = async (req, res) => {
         result: duo_res.response.result,
         username: user.data.username
       }
+
+      duo_res.response.devices[0].capabilities.map((x) => {
+        if(x == "push"){
+          final_res.factor = "push"
+        }
+      });
+
       return res.json(final_res);
     });
   } catch (error){
@@ -54,15 +61,9 @@ export const makeAuthPush = async (req, res) => {
       return res.json(resp);
     });
   } catch (error){
-    if (error.message == "Request failed with status code 404"){
-      res.status(404).json({
-        message: "Usuario no encontrado"
-      })
-    } else {
-      res.status(500).json({
-        message: "Error en el lado del servidor"
-      })
-    }
+    res.status(500).json({
+      result: "failed"
+    });
   }
 
 }
@@ -85,7 +86,7 @@ export const makeAuthCode = async (req, res) => {
     });
   } catch (error){
     res.status(500).json({
-      message: error.message || "Error detectado. No se pudo encontrar el usuario",
+      message: error.message
     });
   }
 
